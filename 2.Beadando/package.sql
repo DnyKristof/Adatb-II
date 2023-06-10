@@ -83,3 +83,62 @@ BEGIN
     RETURN SZAM;
 END;
 
+
+
+
+
+create or replace PROCEDURE KIVONULAS_FELTOLTES(szam INT) IS
+CSID INT;
+AID INT;
+BID INT;
+KID INT :=1;
+
+TYPE Leirasok IS TABLE OF VARCHAR2(100);
+
+LEIR Leirasok := Leirasok('Autóbaleset','Megbotlás','Támadás','Utcai harc','Háztartásibeli baleset');
+
+Random_index NUMBER;
+Random_Leiras Varchar2(100);
+
+Random_Indulas TIMESTAMP;
+Random_Erkezes TIMESTAMP;
+
+
+BEGIN
+
+    DELETE FROM KIVONULAS;
+
+    FOR I IN 1..szam LOOP
+
+        Random_index := DBMS_RANDOM.VALUE(1,LEIR.COUNT);
+        Random_Leiras := LEIR(Random_index);
+
+        SELECT SYSDATE - DBMS_RANDOM.VALUE(0, 50) INTO Random_Indulas FROM DUAL;
+        SELECT SYSDATE - DBMS_RANDOM.VALUE(60, 110) INTO Random_Erkezes FROM DUAL;
+
+        SELECT CSID INTO CSID FROM (SELECT CSID FROM CSAPAT ORDER BY DBMS_RANDOM.VALUE) WHERE ROWNUM = 1;
+        SELECT AID INTO AID FROM (SELECT AID FROM AUTO ORDER BY DBMS_RANDOM.VALUE) WHERE ROWNUM = 1;
+        SELECT BID INTO BID FROM (SELECT BID FROM BEJELENTES ORDER BY DBMS_RANDOM.VALUE) WHERE ROWNUM = 1;
+
+        INSERT INTO KIVONULAS VALUES(KID,Random_Indulas,Random_Erkezes,Random_Leiras,CSID,AID,BID);
+
+        KID:=KID+1;
+        COMMIT;
+    END LOOP;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+
+END;
+
+
+
+
+
+
+
+
+
+
+
